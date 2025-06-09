@@ -17,7 +17,7 @@
 SpotlightWindow::SpotlightWindow(QWidget *parent) : QWidget(parent) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
     setAttribute(Qt::WA_TranslucentBackground);
-    setFixedSize(640, 520);
+    setFixedSize(1120, 750);
     setStyleSheet("border-radius: 16px;");
     setupUI();
 }
@@ -27,7 +27,7 @@ void SpotlightWindow::setupUI() {
     layout->setContentsMargins(10, 10, 10, 10);
     layout->setSpacing(10);
     searchBar = new QLineEdit(this);
-    searchBar->setPlaceholderText("Search apps...");
+    searchBar->setPlaceholderText("App Pulse");
     searchBar->setStyleSheet(
         "QLineEdit {"
         "  padding: 10px 14px;"
