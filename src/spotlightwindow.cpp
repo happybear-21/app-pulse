@@ -18,7 +18,7 @@ SpotlightWindow::SpotlightWindow(QWidget *parent) : QWidget(parent) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
     setAttribute(Qt::WA_TranslucentBackground);
     setFixedSize(640, 520);
-    setStyleSheet("border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);");
+    setStyleSheet("border-radius: 16px;");
     setupUI();
 }
 
@@ -89,12 +89,7 @@ void SpotlightWindow::setupUI() {
         "border-radius: 12px;"
         "margin-left: 12px; margin-right: 12px;"
     );
-    // Add drop shadow effect
-    QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(bottomBar);
-    shadow->setBlurRadius(16);
-    shadow->setOffset(0, 2);
-    shadow->setColor(QColor(0, 0, 0, 40));
-    bottomBar->setGraphicsEffect(shadow);
+
     QHBoxLayout *barLayout = new QHBoxLayout(bottomBar);
     barLayout->setContentsMargins(16, 0, 16, 0);
     barLayout->addStretch(); // Push content to right
