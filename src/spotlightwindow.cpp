@@ -12,6 +12,7 @@
 #include <QRandomGenerator>
 #include <QTimer>
 #include <QDateTime>
+#include <QGraphicsDropShadowEffect>
 
 SpotlightWindow::SpotlightWindow(QWidget *parent) : QWidget(parent) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
@@ -87,8 +88,13 @@ void SpotlightWindow::setupUI() {
         "background: rgba(40, 40, 40, 0.82);"
         "border-radius: 12px;"
         "margin-left: 12px; margin-right: 12px;"
-        "box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);"
     );
+    // Add drop shadow effect
+    QGraphicsDropShadowEffect *shadow = new QGraphicsDropShadowEffect(bottomBar);
+    shadow->setBlurRadius(16);
+    shadow->setOffset(0, 2);
+    shadow->setColor(QColor(0, 0, 0, 40));
+    bottomBar->setGraphicsEffect(shadow);
     QHBoxLayout *barLayout = new QHBoxLayout(bottomBar);
     barLayout->setContentsMargins(16, 0, 16, 0);
     barLayout->addStretch(); // Push content to right
