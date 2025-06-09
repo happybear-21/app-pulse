@@ -23,9 +23,13 @@ private:
     QStringList allAppNames;
     QList<QIcon> allAppIcons;
     QStringList allAppPaths; // Stores full paths to .app bundles
+    QWidget *bottomBar;
+    QLabel *clockLabel;
+    QTimer *clockTimer;
     void setupUI();
     void loadApplications();
     void filterResults(const QString &text);
+    void updateClock();
 protected:
     void paintEvent(QPaintEvent *event) override;
     bool eventFilter(QObject *obj, QEvent *event) override;

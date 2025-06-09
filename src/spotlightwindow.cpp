@@ -10,6 +10,8 @@
 #include <QKeyEvent>
 #include <QApplication>
 #include <QRandomGenerator>
+#include <QTimer>
+#include <QDateTime>
 
 SpotlightWindow::SpotlightWindow(QWidget *parent) : QWidget(parent) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
@@ -77,6 +79,31 @@ void SpotlightWindow::setupUI() {
     connect(searchBar, &QLineEdit::textChanged, this, &SpotlightWindow::filterResults);
     searchBar->installEventFilter(this);
     searchBar->setFocus();
+
+    // --- Floating Bottom Bar with Clock ---
+    bottomBar = new QWidget(this);
+    bottomBar->setFixedHeight(44);
+    bottomBar->setStyleSheet(
+        "background: rgba(40, 40, 40, 0.82);"
+        "border-radius: 12px;"
+        "margin-left: 12px; margin-right: 12px;"
+        "box-shadow: 0 2px 12px 0 rgba(0,0,0,0.10);"
+    );
+    QHBoxLayout *barLayout = new QHBoxLayout(bottomBar);
+    barLayout->setContentsMargins(16, 0, 16, 0);
+    barLayout->addStretch(); // Push content to right
+    clockLabel = new QLabel(bottomBar);
+    clockLabel->setStyleSheet(
+        "color: #e0e0e0; font-size: 15px; font-family: 'Menlo', 'Consolas', monospace; letter-spacing: 0.08em;"
+    );
+    barLayout->addWidget(clockLabel);
+    layout->setStretchFactor(appList, 1); // Let appList expand
+    layout->addWidget(bottomBar);
+
+    clockTimer = new QTimer(this);
+    connect(clockTimer, &QTimer::timeout, this, &SpotlightWindow::updateClock);
+    clockTimer->start(1000);
+    updateClock();
 }
 
 #include <QDir>
@@ -124,6 +151,15 @@ void SpotlightWindow::filterResults(const QString &text) {
 }
 
 // Removed applyBlurEffect; using paintEvent for frosted glass effect.
+
+void SpotlightWindow::updateClock() {
+    QDateTime now = QDateTime::currentDateTime();
+    QString day = now.toString("ddd").toUpper();
+    QString date = now.toString("dd MMM yyyy").toUpper();
+    QString time = now.toString("HH:mm:ss");
+    clockLabel->setText(QString("%1 %2 %3").arg(day).arg(date).arg(time));
+}
+
 
 #include <QEvent>
 #include <QKeyEvent>
