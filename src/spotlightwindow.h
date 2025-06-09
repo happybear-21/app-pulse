@@ -22,6 +22,7 @@ private:
     QListWidget *appList;
     QStringList allAppNames;
     QList<QIcon> allAppIcons;
+    QStringList allAppPaths; // Stores full paths to .app bundles
     void setupUI();
     void loadApplications();
     void filterResults(const QString &text);

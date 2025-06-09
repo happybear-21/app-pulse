@@ -13,7 +13,7 @@
 SpotlightWindow::SpotlightWindow(QWidget *parent) : QWidget(parent) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
     setAttribute(Qt::WA_TranslucentBackground);
-    setFixedSize(480, 520);
+    setFixedSize(640, 520);
     setStyleSheet("border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);");
     setupUI();
 }
@@ -40,6 +40,24 @@ void SpotlightWindow::setupUI() {
         "QListWidget { background: transparent; color: #fff; font-size: 15px; border: none; }"
         "QListWidget::item { padding: 10px 12px; border-radius: 6px; }"
         "QListWidget::item:selected { background: rgba(255,255,255,0.13); }"
+        "QScrollBar:vertical {"
+        "  background: transparent;"
+        "  width: 6px;"
+        "  margin: 2px 2px 2px 2px;"
+        "  border-radius: 3px;"
+        "}"
+        "QScrollBar::handle:vertical {"
+        "  background: rgba(255,255,255,0.18);"
+        "  min-height: 20px;"
+        "  border-radius: 3px;"
+        "}"
+        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {"
+        "  height: 0;"
+        "  subcontrol-origin: margin;"
+        "}"
+        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+        "  background: none;"
+        "}"
     );
     layout->addWidget(appList);
     loadApplications();
@@ -58,6 +76,7 @@ void SpotlightWindow::loadApplications() {
     QFileIconProvider iconProvider;
     QStringList appDirs = { "/Applications", QDir::homePath() + "/Applications" };
     QSet<QString> seen;
+    allAppPaths.clear();
     for (const QString &dirPath : appDirs) {
         QDir dir(dirPath);
         QFileInfoList apps = dir.entryInfoList({"*.app"}, QDir::Dirs | QDir::NoDotAndDotDot);
@@ -68,6 +87,7 @@ void SpotlightWindow::loadApplications() {
             QIcon icon = iconProvider.icon(info);
             allAppNames.append(appName);
             allAppIcons.append(icon);
+            allAppPaths.append(info.absoluteFilePath());
             QListWidgetItem *item = new QListWidgetItem(icon, appName, appList);
             appList->addItem(item);
         }
@@ -84,12 +104,39 @@ void SpotlightWindow::filterResults(const QString &text) {
 
 // Removed applyBlurEffect; using paintEvent for frosted glass effect.
 
+#include <QProcess>
+
 void SpotlightWindow::keyPressEvent(QKeyEvent *event) {
     if (event->key() == Qt::Key_Escape) {
         qApp->quit();
-    } else {
-        QWidget::keyPressEvent(event);
+        return;
     }
+    if (event->key() == Qt::Key_Down) {
+        int count = appList->count();
+        if (count == 0) return;
+        int current = appList->currentRow();
+        int next = current + 1;
+        while (next < count && appList->item(next)->isHidden()) ++next;
+        if (next < count) appList->setCurrentRow(next);
+        return;
+    }
+    if (event->key() == Qt::Key_Up) {
+        int count = appList->count();
+        if (count == 0) return;
+        int current = appList->currentRow();
+        int prev = current - 1;
+        while (prev >= 0 && appList->item(prev)->isHidden()) --prev;
+        if (prev >= 0) appList->setCurrentRow(prev);
+        return;
+    }
+    if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
+        int row = appList->currentRow();
+        if (row >= 0 && row < allAppPaths.size() && !appList->item(row)->isHidden()) {
+            QProcess::startDetached("open", QStringList() << allAppPaths[row]);
+        }
+        return;
+    }
+    QWidget::keyPressEvent(event);
 }
 
 void SpotlightWindow::paintEvent(QPaintEvent *event) {
