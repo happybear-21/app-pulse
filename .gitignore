@@ -1,0 +1,65 @@
+# Build directories
+/build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.o
+*.obj
+*.so
+*.a
+*.lib
+*.dll
+*.exe
+*.app
+*.dylib
+*.moc
+*.qrc
+*.user
+*.pro.user
+*.autosave
+
+# Qt Creator/CLion/VSCode/IDE files
+*.user
+*.user.*
+*.sln
+*.vcxproj*
+.idea/
+.vscode/
+*.swp
+*.DS_Store
+*.directory
+*.kate-swp
+*.kdev4
+*.kdev3
+*.cproject
+*.project
+*.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Test/coverage
+*.gcda
+*.gcno
+*.gcov
+coverage/
+
+# Misc
+*.bak
+*.tmp
+*.old
+*.orig
+*.rej
+
+# Qt generated
+moc_*
+ui_*
+qrc_*
+
+# App bundles
+*.app/
