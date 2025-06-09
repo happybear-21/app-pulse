@@ -24,6 +24,7 @@ private:
     QList<QIcon> allAppIcons;
     QStringList allAppPaths; // Stores full paths to .app bundles
     QWidget *bottomBar;
+    QLabel *footerHintsLabel;
     QLabel *clockLabel;
     QTimer *clockTimer;
     void setupUI();

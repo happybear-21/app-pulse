@@ -92,10 +92,18 @@ void SpotlightWindow::setupUI() {
 
     QHBoxLayout *barLayout = new QHBoxLayout(bottomBar);
     barLayout->setContentsMargins(16, 0, 16, 0);
-    barLayout->addStretch(); // Push content to right
+    // Footer hints label (left)
+    footerHintsLabel = new QLabel(bottomBar);
+    footerHintsLabel->setText("▲/▼ Move selection    ⏎ Launch app    ⎋ Close");
+    footerHintsLabel->setStyleSheet(
+        "color: #b0b3b8; font-size: 13px; font-family: 'Poppins', 'Segoe UI', 'Arial', sans-serif; letter-spacing: 0.03em;"
+    );
+    barLayout->addWidget(footerHintsLabel);
+    barLayout->addStretch(); // Space between hints and clock
+    // Clock label (right)
     clockLabel = new QLabel(bottomBar);
     clockLabel->setStyleSheet(
-        "color: #e0e0e0; font-size: 15px; font-family: 'Menlo', 'Consolas', monospace; letter-spacing: 0.08em;"
+        "color: #e0e0e0; font-size: 13px; font-family: 'Poppins', 'Segoe UI', 'Arial', sans-serif; letter-spacing: 0.08em;"
     );
     barLayout->addWidget(clockLabel);
     layout->setStretchFactor(appList, 1); // Let appList expand
