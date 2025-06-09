@@ -2,9 +2,12 @@
 #define SPOTLIGHTWINDOW_H
 
 #include <QWidget>
+#include <QLabel>
 
 class QLineEdit;
 class QListWidget;
+class QLabel;
+class QWidget;
 
 class SpotlightWindow : public QWidget {
     Q_OBJECT
@@ -16,9 +19,11 @@ protected:
 
 private:
     QLineEdit *searchBar;
-    QListWidget *resultsList;
-    QStringList allResults;
+    QListWidget *appList;
+    QStringList allAppNames;
+    QList<QIcon> allAppIcons;
     void setupUI();
+    void loadApplications();
     void filterResults(const QString &text);
 protected:
     void paintEvent(QPaintEvent *event) override;

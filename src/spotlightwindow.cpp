@@ -2,6 +2,8 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QVBoxLayout>
+#include <QLabel>
+#include <QHBoxLayout>
 #include <QPainter>
 #include <QPaintEvent>
 #include <QPalette>
@@ -11,57 +13,72 @@
 SpotlightWindow::SpotlightWindow(QWidget *parent) : QWidget(parent) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
     setAttribute(Qt::WA_TranslucentBackground);
-    setFixedSize(420, 320);
+    setFixedSize(480, 520);
     setStyleSheet("border-radius: 16px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);");
     setupUI();
 }
 
 void SpotlightWindow::setupUI() {
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setContentsMargins(24, 24, 24, 24);
-    layout->setSpacing(16);
+    layout->setContentsMargins(10, 10, 10, 10);
+    layout->setSpacing(10);
     searchBar = new QLineEdit(this);
-    searchBar->setPlaceholderText("Search...");
+    searchBar->setPlaceholderText("Search apps...");
     searchBar->setStyleSheet(
         "QLineEdit {"
-        "  padding: 10px 16px;"
+        "  padding: 10px 14px;"
         "  border-radius: 8px;"
-        "  background: rgba(255,255,255,0.12);"
+        "  background: rgba(255,255,255,0.10);"
         "  color: #fff;"
-        "  font-size: 18px;"
+        "  font-size: 17px;"
         "  border: none;"
         "}"
     );
-    resultsList = new QListWidget(this);
-    resultsList->setStyleSheet(
-        "QListWidget {"
-        "  background: transparent;"
-        "  color: #fff;"
-        "  font-size: 16px;"
-        "  border: none;"
-        "}"
-        "QListWidget::item {"
-        "  padding: 8px 12px;"
-        "  border-radius: 6px;"
-        "}"
-        "QListWidget::item:selected {"
-        "  background: rgba(255,255,255,0.15);"
-        "}"
-    );
-    // Dummy data
-    allResults = {"Open Google", "Open VSCode", "Run AI Command", "Find File: report.pdf", "Search: Cascade AI"};
-    resultsList->addItems(allResults);
-    connect(searchBar, &QLineEdit::textChanged, this, &SpotlightWindow::filterResults);
     layout->addWidget(searchBar);
-    layout->addWidget(resultsList);
+    appList = new QListWidget(this);
+    appList->setStyleSheet(
+        "QListWidget { background: transparent; color: #fff; font-size: 15px; border: none; }"
+        "QListWidget::item { padding: 10px 12px; border-radius: 6px; }"
+        "QListWidget::item:selected { background: rgba(255,255,255,0.13); }"
+    );
+    layout->addWidget(appList);
+    loadApplications();
+    connect(searchBar, &QLineEdit::textChanged, this, &SpotlightWindow::filterResults);
+}
+
+#include <QDir>
+#include <QFileInfoList>
+#include <QFileIconProvider>
+#include <QStandardPaths>
+
+void SpotlightWindow::loadApplications() {
+    appList->clear();
+    allAppNames.clear();
+    allAppIcons.clear();
+    QFileIconProvider iconProvider;
+    QStringList appDirs = { "/Applications", QDir::homePath() + "/Applications" };
+    QSet<QString> seen;
+    for (const QString &dirPath : appDirs) {
+        QDir dir(dirPath);
+        QFileInfoList apps = dir.entryInfoList({"*.app"}, QDir::Dirs | QDir::NoDotAndDotDot);
+        for (const QFileInfo &info : apps) {
+            QString appName = info.baseName();
+            if (seen.contains(appName)) continue;
+            seen.insert(appName);
+            QIcon icon = iconProvider.icon(info);
+            allAppNames.append(appName);
+            allAppIcons.append(icon);
+            QListWidgetItem *item = new QListWidgetItem(icon, appName, appList);
+            appList->addItem(item);
+        }
+    }
 }
 
 void SpotlightWindow::filterResults(const QString &text) {
-    resultsList->clear();
-    for (const QString &item : allResults) {
-        if (item.contains(text, Qt::CaseInsensitive)) {
-            resultsList->addItem(item);
-        }
+    for (int i = 0; i < appList->count(); ++i) {
+        QListWidgetItem* item = appList->item(i);
+        bool match = item->text().contains(text, Qt::CaseInsensitive);
+        item->setHidden(!match);
     }
 }
 
