@@ -28,6 +28,7 @@ private:
     void filterResults(const QString &text);
 protected:
     void paintEvent(QPaintEvent *event) override;
+    bool eventFilter(QObject *obj, QEvent *event) override;
 };
 
 #endif // SPOTLIGHTWINDOW_H

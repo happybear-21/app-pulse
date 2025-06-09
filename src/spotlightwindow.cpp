@@ -9,6 +9,7 @@
 #include <QPalette>
 #include <QKeyEvent>
 #include <QApplication>
+#include <QRandomGenerator>
 
 SpotlightWindow::SpotlightWindow(QWidget *parent) : QWidget(parent) {
     setWindowFlags(Qt::FramelessWindowHint | Qt::Dialog);
@@ -72,7 +73,10 @@ void SpotlightWindow::setupUI() {
             break;
         }
     }
+    appList->setFocus();
     connect(searchBar, &QLineEdit::textChanged, this, &SpotlightWindow::filterResults);
+    searchBar->installEventFilter(this);
+    searchBar->setFocus();
 }
 
 #include <QDir>
@@ -121,9 +125,63 @@ void SpotlightWindow::filterResults(const QString &text) {
 
 // Removed applyBlurEffect; using paintEvent for frosted glass effect.
 
+#include <QEvent>
+#include <QKeyEvent>
+bool SpotlightWindow::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == searchBar && event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        if (keyEvent->key() == Qt::Key_Down || keyEvent->key() == Qt::Key_Up) {
+            this->keyPressEvent(keyEvent);
+            return true;
+        }
+    }
+    return QWidget::eventFilter(obj, event);
+}
+
+
 #include <QProcess>
 
 void SpotlightWindow::keyPressEvent(QKeyEvent *event) {
+    // If searchBar has focus and Down pressed, move focus to appList and select first visible item
+    if (event->key() == Qt::Key_Down && searchBar->hasFocus()) {
+        for (int i = 0; i < appList->count(); ++i) {
+            if (!appList->item(i)->isHidden()) {
+                appList->setCurrentRow(i);
+                appList->setFocus();
+                break;
+            }
+        }
+        return;
+    }
+    // If appList has focus
+    if (appList->hasFocus()) {
+        int count = appList->count();
+        // Find all visible indices
+        QVector<int> visibleIndices;
+        for (int i = 0; i < count; ++i) {
+            if (!appList->item(i)->isHidden()) visibleIndices.append(i);
+        }
+        int current = appList->currentRow();
+        int pos = visibleIndices.indexOf(current);
+        // Up pressed
+        if (event->key() == Qt::Key_Up) {
+            if (pos == 0 && !visibleIndices.isEmpty()) {
+                // At first visible, move focus to searchBar
+                searchBar->setFocus();
+                return;
+            } else if (pos > 0) {
+                appList->setCurrentRow(visibleIndices[pos - 1]);
+                return;
+            }
+        }
+        // Down pressed
+        if (event->key() == Qt::Key_Down) {
+            if (pos >= 0 && pos < visibleIndices.size() - 1) {
+                appList->setCurrentRow(visibleIndices[pos + 1]);
+                return;
+            }
+        }
+    }
     if (event->key() == Qt::Key_Escape) {
         qApp->quit();
         return;
@@ -179,7 +237,5 @@ void SpotlightWindow::paintEvent(QPaintEvent *event) {
     painter.setBrush(bg);
     painter.setPen(Qt::NoPen);
     painter.drawRoundedRect(rect(), 16, 16);
-    // Optionally, add noise or gradient for more realistic frosted glass
     QWidget::paintEvent(event);
 }
-
