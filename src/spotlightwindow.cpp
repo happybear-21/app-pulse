@@ -35,6 +35,11 @@ void SpotlightWindow::setupUI() {
         "}"
     );
     layout->addWidget(searchBar);
+    QLabel *appsHeader = new QLabel("APPLICATIONS", this);
+    appsHeader->setStyleSheet(
+        "QLabel { color: #b0b3b8; font-size: 10px; font-weight: bold; letter-spacing: 0.15em; margin: 0 0 2px 2px; }"
+    );
+    layout->addWidget(appsHeader);
     appList = new QListWidget(this);
     appList->setStyleSheet(
         "QListWidget { background: transparent; color: #fff; font-size: 15px; border: none; }"
@@ -61,6 +66,12 @@ void SpotlightWindow::setupUI() {
     );
     layout->addWidget(appList);
     loadApplications();
+    for (int i = 0; i < appList->count(); ++i) {
+        if (!appList->item(i)->isHidden()) {
+            appList->setCurrentRow(i);
+            break;
+        }
+    }
     connect(searchBar, &QLineEdit::textChanged, this, &SpotlightWindow::filterResults);
 }
 
@@ -100,6 +111,12 @@ void SpotlightWindow::filterResults(const QString &text) {
         bool match = item->text().contains(text, Qt::CaseInsensitive);
         item->setHidden(!match);
     }
+    for (int i = 0; i < appList->count(); ++i) {
+        if (!appList->item(i)->isHidden()) {
+            appList->setCurrentRow(i);
+            break;
+        }
+    }
 }
 
 // Removed applyBlurEffect; using paintEvent for frosted glass effect.
@@ -115,6 +132,14 @@ void SpotlightWindow::keyPressEvent(QKeyEvent *event) {
         int count = appList->count();
         if (count == 0) return;
         int current = appList->currentRow();
+        if (current < 0) {
+            for (int i = 0; i < count; ++i) {
+                if (!appList->item(i)->isHidden()) {
+                    appList->setCurrentRow(i);
+                    return;
+                }
+            }
+        }
         int next = current + 1;
         while (next < count && appList->item(next)->isHidden()) ++next;
         if (next < count) appList->setCurrentRow(next);
@@ -124,6 +149,14 @@ void SpotlightWindow::keyPressEvent(QKeyEvent *event) {
         int count = appList->count();
         if (count == 0) return;
         int current = appList->currentRow();
+        if (current < 0) {
+            for (int i = 0; i < count; ++i) {
+                if (!appList->item(i)->isHidden()) {
+                    appList->setCurrentRow(i);
+                    return;
+                }
+            }
+        }
         int prev = current - 1;
         while (prev >= 0 && appList->item(prev)->isHidden()) --prev;
         if (prev >= 0) appList->setCurrentRow(prev);
